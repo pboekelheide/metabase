@@ -1,5 +1,6 @@
 (ns metabase.query-processor.pivot
-  "Pivot table actions for the query processor")
+  "Pivot table actions for the query processor"
+  (:require [clojure.tools.logging :as log]))
 
 (defn powerset
   "Generate the set of all subsets"
@@ -20,5 +21,10 @@
   (let [query     (:query request)
         breakouts (generate-breakouts (:breakout query))]
     (map (fn [breakout]
-           {:breakout (vec breakout)
-            :query    (assoc query :breakout (vec breakout))}) breakouts)))
+           (-> request
+               (assoc-in [:query :breakout] (vec breakout))
+               ;;TODO: `pivot-grouping` is not "magic" enough to mark it as an internal thing
+               (assoc-in [:query :fields] [[:expression "pivot-grouping"]])
+               ;;TODO: replace this value with a bitmask or something to indicate the source better
+               (assoc-in [:query :expressions] {"pivot-grouping" [:ltrim (str (vec breakout))]}))) 
+         breakouts)))
