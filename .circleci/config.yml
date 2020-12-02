@@ -629,7 +629,7 @@ jobs:
             if [ ! -f './resources/frontend_client/index.html' ];
               then ./bin/build version frontend;
             fi
-          no_output_timeout: 5m
+          no_output_timeout: 20m
       - run:
           name: Build uberjar if needed
           environment:
